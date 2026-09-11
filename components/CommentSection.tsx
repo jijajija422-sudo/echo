@@ -81,7 +81,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
             type="text"
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
-            placeholder={`Comment as ${activeUser.full_name.split(' ')[0]}...`}
+            placeholder={`Comment as ${(activeUser.full_name || 'User').split(' ')[0]}...`}
             className="w-full pl-3 pr-10 py-2 text-xs bg-white border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-slate-800 transition text-slate-800 placeholder-slate-400"
           />
           <button

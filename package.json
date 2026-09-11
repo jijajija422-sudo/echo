@@ -8,11 +8,16 @@
     "start": "next start"
   },
   "dependencies": {
+    "@auth/supabase-adapter": "^1.11.3",
     "@supabase/supabase-js": "^2.48.1",
+    "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.11.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.475.0",
     "next": "^15.1.7",
+    "next-auth": "^5.0.0-beta.32",
+    "next-cloudinary": "^6.19.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^3.0.1"

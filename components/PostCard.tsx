@@ -12,6 +12,7 @@ interface PostCardProps {
   activeUser: User;
   onToggleLike: (postId: string) => void;
   onAddComment: (postId: string, content: string) => void;
+  onShare: (postId: string) => void;
 }
 
 export const PostCard: React.FC<PostCardProps> = ({
@@ -20,6 +21,7 @@ export const PostCard: React.FC<PostCardProps> = ({
   activeUser,
   onToggleLike,
   onAddComment,
+  onShare,
 }) => {
   const [showComments, setShowComments] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -31,7 +33,8 @@ export const PostCard: React.FC<PostCardProps> = ({
     : '2h ago';
 
   const handleShare = () => {
-    navigator.clipboard?.writeText(window.location.href);
+    onShare(post.id);
+    navigator.clipboard?.writeText(`${window.location.origin}/posts/${post.id}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -41,7 +44,7 @@ export const PostCard: React.FC<PostCardProps> = ({
     return parts.map((part, i) => {
       if (part.startsWith('#')) {
         return (
-          <span key={i} className="text-brand-600 font-semibold cursor-pointer hover:underline">
+          <span key={i} className="text-emerald-600 font-semibold cursor-pointer hover:underline">
             {part}
           </span>
         );
@@ -115,7 +118,7 @@ export const PostCard: React.FC<PostCardProps> = ({
               <div className="w-5 h-5 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] ring-2 ring-white">
                 ❤️
               </div>
-              <div className="w-5 h-5 rounded-full bg-brand-600 text-white flex items-center justify-center text-[10px] ring-2 ring-white">
+              <div className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] ring-2 ring-white">
                 👍
               </div>
             </div>
@@ -125,7 +128,7 @@ export const PostCard: React.FC<PostCardProps> = ({
           <div className="flex items-center gap-3 text-slate-400 font-medium">
             <span>{comments.length || post.comments_count} comments</span>
             <span>•</span>
-            <span>{post.shares_count || 12} shares</span>
+            <span>{post.shares_count || 0} shares</span>
           </div>
         </div>
 

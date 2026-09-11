@@ -17,6 +17,7 @@ interface FeedProps {
   onAddComment: (postId: string, content: string) => void;
   onOpenCreatePost: () => void;
   onOpenCreateStory: () => void;
+  onSharePost: (postId: string) => void;
   searchQuery: string;
   onClearSearch: () => void;
 }
@@ -30,6 +31,7 @@ export const Feed: React.FC<FeedProps> = ({
   onAddComment,
   onOpenCreatePost,
   onOpenCreateStory,
+  onSharePost,
   searchQuery,
   onClearSearch,
 }) => {
@@ -45,8 +47,8 @@ export const Feed: React.FC<FeedProps> = ({
       list = list.filter(
         (p) =>
           p.text_content.toLowerCase().includes(q) ||
-          p.user?.full_name.toLowerCase().includes(q) ||
-          p.user?.username.toLowerCase().includes(q)
+          p.user?.full_name?.toLowerCase().includes(q) ||
+          p.user?.username?.toLowerCase().includes(q)
       );
     }
 
@@ -80,7 +82,7 @@ export const Feed: React.FC<FeedProps> = ({
             onClick={() => setFilter('latest')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
               filter === 'latest'
-                ? 'bg-brand-50 text-brand-600 shadow-2xs'
+                ? 'bg-emerald-50 text-emerald-600 shadow-2xs'
                 : 'text-slate-500 hover:text-slate-900'
             }`}
           >
@@ -92,7 +94,7 @@ export const Feed: React.FC<FeedProps> = ({
             onClick={() => setFilter('popular')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
               filter === 'popular'
-                ? 'bg-brand-50 text-brand-600 shadow-2xs'
+                ? 'bg-emerald-50 text-emerald-600 shadow-2xs'
                 : 'text-slate-500 hover:text-slate-900'
             }`}
           >
@@ -104,7 +106,7 @@ export const Feed: React.FC<FeedProps> = ({
             onClick={() => setFilter('following')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
               filter === 'following'
-                ? 'bg-brand-50 text-brand-600 shadow-2xs'
+                ? 'bg-emerald-50 text-emerald-600 shadow-2xs'
                 : 'text-slate-500 hover:text-slate-900'
             }`}
           >
@@ -120,13 +122,13 @@ export const Feed: React.FC<FeedProps> = ({
 
       {/* Search Filter Status */}
       {searchQuery && (
-        <div className="mb-4 px-4 py-2.5 bg-brand-50 border border-brand-200 text-brand-900 rounded-2xl text-xs flex items-center justify-between shadow-2xs">
+        <div className="mb-4 px-4 py-2.5 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-2xl text-xs flex items-center justify-between shadow-2xs">
           <span>
             Filter results for: <strong className="font-semibold">{searchQuery}</strong>
           </span>
           <button
             onClick={onClearSearch}
-            className="text-brand-700 hover:text-brand-900 font-bold underline"
+            className="text-emerald-700 hover:text-emerald-900 font-bold underline"
           >
             Reset filter
           </button>
@@ -144,6 +146,7 @@ export const Feed: React.FC<FeedProps> = ({
               activeUser={activeUser}
               onToggleLike={onToggleLike}
               onAddComment={onAddComment}
+              onShare={onSharePost}
             />
           ))}
         </div>
@@ -169,7 +172,7 @@ export const Feed: React.FC<FeedProps> = ({
           ) : (
             <button
               onClick={onOpenCreatePost}
-              className="px-4 py-2 text-xs font-bold bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition shadow-xs"
+              className="px-4 py-2 text-xs font-bold bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition shadow-xs"
             >
               Create First Post
             </button>

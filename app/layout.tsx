@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import { AuthProvider } from '@/lib/supabase/AuthContext';
 
 export const metadata: Metadata = {
   title: 'Echo | Modern Text & Image Community Feed',
@@ -26,7 +27,9 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body className="min-h-full bg-slate-50 text-slate-900 selection:bg-emerald-100 selection:text-emerald-900">
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

@@ -1,5 +1,6 @@
 export interface User {
   id: string;
+  email?: string;
   username: string;
   full_name: string;
   avatar_url: string;
@@ -35,6 +36,9 @@ export interface Story {
   user: User;
   has_unseen: boolean;
   image_url?: string;
+  text_content?: string;
+  created_at?: string;
+  expires_at?: string;
 }
 
 export interface Community {
