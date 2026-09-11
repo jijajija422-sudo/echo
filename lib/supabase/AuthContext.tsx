@@ -2,14 +2,24 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '@/lib/types';
+import { auth, googleProvider } from '@/lib/supabase/firebase';
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+  updateProfile,
+} from 'firebase/auth';
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  loginWithGoogle: () => void;
+  loginWithGoogle: () => Promise<boolean>;
   signup: (name: string, email: string, password: string) => Promise<boolean>;
   logout: () => void;
+  error: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -17,54 +27,73 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check for existing session
-    const savedUser = localStorage.getItem('echo_user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-    setIsLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        setUser({
+          id: firebaseUser.uid,
+          email: firebaseUser.email || '',
+          username: firebaseUser.displayName?.toLowerCase().replace(/\s/g, '_') || '',
+          full_name: firebaseUser.displayName || '',
+          avatar_url: firebaseUser.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+          bio: '',
+        });
+      } else {
+        setUser(null);
+      }
+      setIsLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    // Demo login - in production, verify against Supabase
-    const demoUsers: User[] = [
-      { id: 'user-jija-001', email: 'jija@example.com', username: 'jijahmed', full_name: 'Jija Ahmed', avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80', bio: 'Full-Stack Developer & UI Creator' },
-      { id: 'user-sarah-002', email: 'sarah@example.com', username: 'sarahahmed', full_name: 'Sarah Ahmed', avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80', bio: 'Photographer & Outdoor Explorer' },
-    ];
-    
-    const found = demoUsers.find(u => u.email === email);
-    if (found && password === 'password123') {
-      setUser(found);
-      localStorage.setItem('echo_user', JSON.stringify(found));
+    try {
+      setError(null);
+      await signInWithEmailAndPassword(auth, email, password);
       return true;
+    } catch (err: any) {
+      setError(err.message || 'Failed to sign in');
+      return false;
     }
-    return false;
   };
 
-  const loginWithGoogle = () => {
-    // Demo Google login
-    const googleUser: User = { id: 'user-google-001', email: 'user@gmail.com', username: 'googleuser', full_name: 'Google User', avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80', bio: 'Signed in with Google' };
-    setUser(googleUser);
-    localStorage.setItem('echo_user', JSON.stringify(googleUser));
+  const loginWithGoogle = async (): Promise<boolean> => {
+    try {
+      setError(null);
+      await signInWithPopup(auth, googleProvider);
+      return true;
+    } catch (err: any) {
+      setError(err.message || 'Failed to sign in with Google');
+      return false;
+    }
   };
 
   const signup = async (name: string, email: string, password: string): Promise<boolean> => {
-    // Demo signup
-    const newUser: User = { id: `user-${Date.now()}`, email, username: name.toLowerCase().replace(/\s/g, '_'), full_name: name, avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80', bio: 'New Echo member' };
-    setUser(newUser);
-    localStorage.setItem('echo_user', JSON.stringify(newUser));
-    return true;
+    try {
+      setError(null);
+      const result = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(result.user, { displayName: name });
+      return true;
+    } catch (err: any) {
+      setError(err.message || 'Failed to create account');
+      return false;
+    }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('echo_user');
+  const logout = async () => {
+    try {
+      await signOut(auth);
+      setUser(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to sign out');
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, loginWithGoogle, signup, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, loginWithGoogle, signup, logout, error }}>
       {children}
     </AuthContext.Provider>
   );
